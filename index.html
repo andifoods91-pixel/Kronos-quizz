@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Кронос Куиз: Храмът на Кронос</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Montserrat:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; -webkit-tap-highlight-color: transparent; }
+  body, html { width: 100%; height: 100%; overflow: hidden; background: #070b14; color: #f5ebd6; font-family: 'Montserrat', sans-serif; }
+  #bg-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+  .ui-layer { position: relative; z-index: 10; width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: space-between; padding: 14px; max-width: 480px; margin: 0 auto; }
+  .hidden { display: none !important; }
+  .top-bar { display: flex; justify-content: space-between; align-items: center; }
+  .icon-btn { width: 42px; height: 42px; border-radius: 50%; background: radial-gradient(circle, #3d2b14, #1b1309); border: 2px solid #d4af37; color: #f8e5a6; font-size: 18px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 0 10px rgba(212,175,55,0.4); }
+  .title-box { text-align: center; margin-top: 4px; }
+  .title-main { font-family: 'Cinzel', serif; font-size: 28px; font-weight: 900; color: #ffd97d; text-shadow: 0 2px 12px rgba(255,180,40,0.75); letter-spacing: 2px; }
+  .title-sub { font-family: 'Cinzel', serif; font-size: 12px; color: #d8c398; letter-spacing: 3px; margin-top: 2px; }
+  .start-medallion { width: 195px; height: 195px; border-radius: 50%; margin: 10px auto; background: radial-gradient(circle at 35% 30%, #6e4e23, #291c0b 75%); border: 4px solid #f2c96b; box-shadow: -15px 0 30px rgba(255,110,20,0.85), 15px 0 30px rgba(0,195,255,0.85), inset 0 0 25px rgba(0,0,0,0.8); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+  .start-medallion h2 { font-family: 'Cinzel', serif; font-size: 32px; color: #fff; text-shadow: 0 2px 8px #000; margin: 4px 0; }
+  .start-medallion span { font-size: 12px; font-weight: 700; color: #f6dca2; text-align: center; padding: 0 14px; }
+  .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 6px; }
+  .cat-btn { background: linear-gradient(180deg, #161f30, #0c111c); border: 2px solid #c99e42; border-radius: 10px; padding: 11px 10px; color: #fff; font-weight: 800; font-size: 13px; display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .cat-btn.active { border-color: #4ce1ff; box-shadow: 0 0 15px rgba(76,225,255,0.6); }
+  .question-card { background: rgba(11, 16, 27, 0.94); border: 2.5px solid #d4af37; border-radius: 14px; padding: 20px 16px; text-align: center; position: relative; overflow: visible; box-shadow: 0 10px 30px rgba(0,0,0,0.85); margin: 10px 0; }
+  .q-diamond { position: absolute; top: -14px; left: 50%; transform: translateX(-50%) rotate(45deg); width: 24px; height: 24px; background: #ffb72b; border: 3px solid #fff3c4; box-shadow: 0 0 12px #ffae00; }
+  .q-meta { display: flex; justify-content: space-between; font-size: 11px; font-weight: 800; color: #d4af37; margin-bottom: 10px; text-transform: uppercase; }
+  .q-text { font-size: 18px; font-weight: 800; color: #ffffff; line-height: 1.38; }
+  .jokers-row { display: flex; justify-content: center; gap: 18px; margin: 6px 0; }
+  .joker-btn { width: 68px; height: 68px; border-radius: 50%; background: radial-gradient(circle, #4f3819, #1f1508); border: 2.5px solid #e2ba59; color: #fff; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; font-size: 20px; }
+  .joker-label { position: absolute; bottom: -8px; background: #140f08; border: 1.5px solid #d4af37; border-radius: 8px; font-size: 10px; font-weight: 800; padding: 1px 6px; color: #ffd97d; }
+  .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 8px; }
+  .ans-btn { background: linear-gradient(180deg, #172031, #0c121d); border: 2px solid #d49b38; border-radius: 10px; padding: 14px 10px; color: #fff; font-size: 14px; font-weight: 800; text-align: left; display: flex; align-items: center; gap: 8px; cursor: pointer; min-height: 58px; }
+  .ans-btn.fire { box-shadow: 0 -4px 14px rgba(255,115,20,0.65); border-color: #ff9436; }
+  .ans-btn.ice { box-shadow: 0 -4px 14px rgba(30,200,255,0.65); border-color: #4cd7ff; }
+  .ans-btn.correct { background: #145e2f !important; border-color: #4eff8f !important; }
+  .ans-btn.wrong { background: #6b1515 !important; border-color: #ff5252 !important; }
+  .timer-pill { background: #261a0b; border: 2px solid #e2ba59; border-radius: 14px; padding: 5px 12px; text-align: center; }
+  .timer-val { font-size: 18px; font-weight: 900; color: #ffd97d; }
+  .timer-val.danger { color: #ff4d4d; animation: pulse 0.45s infinite alternate; }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.12); } }
+  .modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.86); z-index: 100; display: flex; align-items: center; justify-content: center; padding: 18px; }
+  .modal-card { background: #101726; border: 2.5px solid #d4af37; border-radius: 16px; padding: 22px; width: 100%; max-width: 360px; text-align: center; }
+  .cta-btn { width: 100%; padding: 13px; margin-top: 10px; border-radius: 10px; border: 2px solid #ffd97d; background: linear-gradient(180deg, #b87b1e, #6e450b); color: #fff; font-weight: 800; font-size: 14px; cursor: pointer; }
+</style>
+</head>
+<body>
+<canvas id="bg-canvas"></canvas>
+
+<!-- HOME SCREEN -->
+<div id="screen-home" class="ui-layer">
+  <div class="top-bar">
+    <button class="icon-btn" id="btn-mute" onclick="toggleMute()">🔊</button>
+    <div class="timer-pill"><span id="stat-progress">0/200</span></div>
+  </div>
+  <div class="title-box">
+    <div class="title-main">КРОНОС КУИЗ</div>
+    <div class="title-sub">ХРАМЪТ НА КРОНОС</div>
+  </div>
+  <div class="start-medallion" onclick="startGame()">
+    <div style="font-size:28px;">⚡</div>
+    <h2>СТАРТ</h2>
+    <span>Спринт срещу часовника</span>
+  </div>
+  <div>
+    <div style="text-align:center; font-size:11px; font-weight:800; color:#d8c398; margin-bottom:8px; letter-spacing:1.5px;">ИЗБЕРИ ТЕМА НА ВЪПРОСИТЕ</div>
+    <div class="cat-grid">
+      <div class="cat-btn active" onclick="selectCat('all', this)">✨ Всички</div>
+      <div class="cat-btn" onclick="selectCat('history', this)">🏛️ История</div>
+      <div class="cat-btn" onclick="selectCat('geo', this)">🌍 География</div>
+      <div class="cat-btn" onclick="selectCat('science', this)">🔬 Наука</div>
+      <div class="cat-btn" onclick="selectCat('culture', this)">🎭 Култура</div>
+      <div class="cat-btn" onclick="selectCat('sport', this)">⚡ Спорт & Природа</div>
+    </div>
+  </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div id="screen-game" class="ui-layer hidden">
+  <div class="top-bar">
+    <button class="icon-btn" onclick="goHome()">✖</button>
+    <div class="timer-pill">ВЪЛНА <span id="wave-num">1</span> | 🛡️ <span id="shield-num">0</span></div>
+    <div class="timer-pill">
+      <div id="timer-display" class="timer-val">20.0s</div>
+      <div style="font-size:9px; color:#c8b082;">/ <span id="cap-display">20.0</span>S ТАВАН</div>
+    </div>
+  </div>
+
+  <div class="question-card">
+    <div class="q-diamond"></div>
+    <div class="q-meta"><span id="q-cat">ТЕМА</span><span id="q-lvl">НИВО I</span></div>
+    <div class="q-text" id="q-text">Зареждане на въпрос...</div>
+  </div>
+
+  <div class="jokers-row">
+    <div class="joker-btn" onclick="useJoker('5050')">⚖️<span class="joker-label" id="lbl-5050">50:50</span></div>
+    <div class="joker-btn" onclick="useJoker('oracle')">👁️<span class="joker-label" id="lbl-oracle">ОРАКУЛ</span></div>
+    <div class="joker-btn" onclick="useJoker('time')">⏳<span class="joker-label" id="lbl-time">+10s</span></div>
+  </div>
+
+  <div class="answers-grid" id="answers-box"></div>
+</div>
+
+<!-- GAME OVER / REVIVE MODAL -->
+<div id="modal-over" class="modal-backdrop hidden">
+  <div class="modal-card">
+    <h3 style="font-family:'Cinzel',serif; color:#ffd97d; font-size:22px; margin-bottom:8px;" id="over-title">ВРЕМЕТО ИЗТЕЧЕ!</h3>
+    <p style="font-size:13px; color:#e0d1b3; margin-bottom:14px;" id="over-desc">Достигна Вълна 1. Гледай кратко видео, за да се върнеш в играта с пълен таймер и +1 Щит!</p>
+    <button class="cta-btn" onclick="triggerRewardedAd('revive')">🎬 ГЛЕДАЙ КЛИП ЗА РИВАЙВ (+1 ЩИТ)</button>
+    <button class="cta-btn" style="background:#263042; border-color:#6d7f9e;" onclick="goHome()">КЪМ НАЧАЛОТО</button>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {cat:'history', q:'През коя година е основана Първата българска държава?', a:['681 г.','632 г.','864 г.','718 г.'], c:0},
+  {cat:'history', q:'Кой български владетел приема християнството за официална религия?', a:['Княз Борис I','Цар Симеон I','Хан Крум','Хан Омуртаг'], c:0},
+  {cat:'geo', q:'Коя е столицата на Великобритания?', a:['Манчестър','Лондон','Единбург','Ливърпул'], c:1},
+  {cat:'geo', q:'Кой е най-високият връх на Балканския полуостров?', a:['Мусала','Вихрен','Олимп','Ботев'], c:0},
+  {cat:'science', q:'Коя планета е известна като Червената планета?', a:['Венера','Марс','Юпитер','Сатурн'], c:1},
+  {cat:'science', q:'Каква е химичната формула на водата?', a:['CO2','H2O','O2','NaCl'], c:1},
+  {cat:'culture', q:'Кой е авторът на романа „Под игото“?', a:['Иван Вазов','Алеко Константинов','Христо Ботев','Елин Пелин'], c:0},
+  {cat:'sport', q:'На колко години се провеждат Летните олимпийски игри?', a:['На 2 години','На 4 години','На 3 години','На 5 години'], c:1}
+];
+
+let selectedCategory = 'all', wave = 1, timeLeft = 20.0, timeCap = 20.0, shields = 0;
+let timerId = null, tickAccum = 0, muted = false, currentQ = null;
+let jokers = { '5050': true, 'oracle': true, 'time': true };
+let pendingAdReward = null;
+
+// Web Audio Clock Tick & Heartbeat (< 5.0s)
+let audioCtx = null;
+function playPulseSound(isHeartbeat) {
+  if (muted) return;
+  try {
+    if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    if (!isHeartbeat) {
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(950, now);
+      gain.gain.setValueAtTime(0.18, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.045);
+      osc.start(now); osc.stop(now + 0.05);
+    } else {
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(65, now);
+      gain.gain.setValueAtTime(0.45, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.14);
+      osc.start(now); osc.stop(now + 0.15);
+    }
+  } catch(e) {}
+}
+
+function toggleMute() {
+  muted = !muted;
+  document.getElementById('btn-mute').innerText = muted ? '🔇' : '🔊';
+}
+
+function selectCat(cat, el) {
+  selectedCategory = cat;
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function startGame() {
+  wave = 1; timeCap = 20.0; timeLeft = 20.0; shields = 0;
+  jokers = { '5050': true, 'oracle': true, 'time': true };
+  updateJokerLabels();
+  document.getElementById('screen-home').classList.add('hidden');
+  document.getElementById('screen-game').classList.remove('hidden');
+  loadNextQuestion();
+  if (timerId) clearInterval(timerId);
+  timerId = setInterval(gameLoop, 100);
+}
+
+function gameLoop() {
+  timeLeft = Math.max(0, +(timeLeft - 0.1).toFixed(1));
+  const disp = document.getElementById('timer-display');
+  disp.innerText = timeLeft.toFixed(1) + 's';
+  if (timeLeft <= 5.0) disp.classList.add('danger'); else disp.classList.remove('danger');
+  tickAccum++;
+  if (timeLeft > 5.0 && tickAccum % 10 === 0) playPulseSound(false);
+  if (timeLeft <= 5.0 && tickAccum % 5 === 0) playPulseSound(true);
+  if (timeLeft <= 0) onWrongOrTimeout('ВРЕМЕТО ИЗТЕЧЕ!');
+}
+
+function loadNextQuestion() {
+  const pool = selectedCategory === 'all' ? QUESTIONS : QUESTIONS.filter(x => x.cat === selectedCategory);
+  currentQ = pool[Math.floor(Math.random() * pool.length)] || QUESTIONS[0];
+  document.getElementById('wave-num').innerText = wave;
+  document.getElementById('shield-num').innerText = shields;
+  document.getElementById('cap-display').innerText = timeCap.toFixed(1);
+  document.getElementById('q-cat').innerText = currentQ.cat.toUpperCase();
+  document.getElementById('q-text').innerText = currentQ.q;
+  const box = document.getElementById('answers-box');
+  box.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  currentQ.a.forEach((txt, idx) => {
+    const btn = document.createElement('div');
+    btn.className = 'ans-btn ' + (idx % 2 === 0 ? 'fire' : 'ice');
+    btn.innerHTML = `<span style="color:#ffd97d;">${letters[idx]}</span> <span>${txt}</span>`;
+    btn.onclick = () => checkAnswer(idx, btn);
+    box.appendChild(btn);
+  });
+}
+
+function checkAnswer(idx, btn) {
+  if (idx === currentQ.c) {
+    btn.classList.add('correct');
+    wave++;
+    if (wave % 10 === 0) { timeCap += 5.0; shields++; jokers = {'5050':true,'oracle':true,'time':true}; updateJokerLabels(); }
+    timeLeft = Math.min(timeCap, +(timeLeft + 5.0).toFixed(1));
+    setTimeout(loadNextQuestion, 280);
+  } else {
+    btn.classList.add('wrong');
+    if (shields > 0) {
+      shields--;
+      document.getElementById('shield-num').innerText = shields;
+      setTimeout(loadNextQuestion, 350);
+    } else {
+      onWrongOrTimeout('ГРЕШЕН ОТГОВОР!');
+    }
+  }
+}
+
+function onWrongOrTimeout(title) {
+  clearInterval(timerId);
+  document.getElementById('over-title').innerText = title;
+  document.getElementById('over-desc').innerText = `Достигна Вълна ${wave}. Изгледай видео реклама за Ривайв с пълен таймер + 1 Щит!`;
+  document.getElementById('modal-over').classList.remove('hidden');
+}
+
+function updateJokerLabels() {
+  document.getElementById('lbl-5050').innerText = jokers['5050'] ? '50:50' : '🎬 КЛИП';
+  document.getElementById('lbl-oracle').innerText = jokers['oracle'] ? 'ОРАКУЛ' : '🎬 КЛИП';
+  document.getElementById('lbl-time').innerText = jokers['time'] ? '+10s' : '🎬 КЛИП';
+}
+
+function useJoker(type) {
+  if (!jokers[type]) {
+    triggerRewardedAd(type);
+    return;
+  }
+  jokers[type] = false;
+  updateJokerLabels();
+  applyJokerEffect(type);
+}
+
+function applyJokerEffect(type) {
+  if (type === 'time') {
+    timeLeft = Math.min(timeCap, +(timeLeft + 10.0).toFixed(1));
+  } else if (type === '5050') {
+    const btns = [...document.querySelectorAll('.ans-btn')];
+    let removed = 0;
+    btns.forEach((b, i) => {
+      if (i !== currentQ.c && removed < 2) { b.style.opacity = '0.25'; b.style.pointerEvents = 'none'; removed++; }
+    });
+  } else if (type === 'oracle') {
+    const btns = [...document.querySelectorAll('.ans-btn')];
+    if (btns[currentQ.c]) btns[currentQ.c].style.borderColor = '#4eff8f';
+  }
+}
+
+function triggerRewardedAd(rewardType) {
+  pendingAdReward = rewardType;
+  if (window.AndroidAdMob && typeof window.AndroidAdMob.showRewardedAd === 'function') {
+    window.AndroidAdMob.showRewardedAd(rewardType);
+  } else {
+    window.onAdMobRewardGranted(rewardType);
+  }
+}
+
+window.onAdMobRewardGranted = function(rewardType) {
+  const type = rewardType || pendingAdReward;
+  if (type === 'revive') {
+    document.getElementById('modal-over').classList.add('hidden');
+    timeLeft = timeCap;
+    shields++;
+    loadNextQuestion();
+    timerId = setInterval(gameLoop, 100);
+  } else {
+    applyJokerEffect(type);
+  }
+};
+
+function goHome() {
+  clearInterval(timerId);
+  document.getElementById('modal-over').classList.add('hidden');
+  document.getElementById('screen-game').classList.add('hidden');
+  document.getElementById('screen-home').classList.remove('hidden');
+}
+
+// 3D Procedural Background Canvas
+const canvas = document.getElementById('bg-canvas');
+const ctx = canvas.getContext('2d');
+let angle = 0;
+function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+window.addEventListener('resize', resize); resize();
+function drawBg() {
+  ctx.fillStyle = '#070b14';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  const cx = canvas.width / 2, cy = canvas.height * 0.27;
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(angle);
+  ctx.strokeStyle = 'rgba(212, 175, 55, 0.28)';
+  ctx.lineWidth = 6;
+  ctx.beginPath(); ctx.arc(0, 0, 110, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+  angle += 0.004;
+  requestAnimationFrame(drawBg);
+}
+drawBg();
+</script>
+</body>
+</html>
